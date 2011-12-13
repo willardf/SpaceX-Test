@@ -12,6 +12,7 @@ function groundStationMapper(){
 	this.init = init;
 	this.loadGroundStations = loadGroundStations;
 	this.addNewMarker = addNewMarker;
+	this.processStations = processStations;
 	
 	function init(){
 		this.loadGroundStations();
@@ -28,40 +29,55 @@ function groundStationMapper(){
 	function loadGroundStations(){
 		getStationRequest = new XMLHttpRequest();
 		
+		document.title = "Loading Ground Stations";
+		
 		//This function will fire when we have our station information
 		getStationRequest.onreadystatechange = function(){
 			if (getStationRequest.readyState == 4 && getStationRequest.status == 200){
+			
 				//Evaluate JSON => Array of objects
-				var stations = eval(getStationRequest.responseText);				
-				//For each station, try to geocode a country for custom markers
-				for (key in stations){
-					var httpRequest = new XMLHttpRequest();
-
-					//This fires when geocoder returns.
-					httpRequest.onreadystatechange = function(){
-						if (httpRequest.readyState == 4 && httpRequest.status == 200){
-							this.mapOwner.addNewMarker(
-								this.station.latitude,
-								this.station.longitude,
-								httpRequest.responseText,
-								this.station.name,
-								this.station.latitude + ", " + 
-								this.station.longitude);
-						}
-					}
-					httpRequest.mapOwner = this.mapOwner;
-					httpRequest.station = stations[key];
-					httpRequest.open("GET",
-						"geocodeLongLat.php?lat=" + stations[key].latitude +
-						"&long="+ stations[key].longitude, false);
-					httpRequest.send();
-				}
+				this.mapOwner.processStations(eval(getStationRequest.responseText), 0);
 			}
 		}
 		//Don't forget whose map you're editing
 		getStationRequest.mapOwner = this;
 		getStationRequest.open("GET","loadStations.php", true);
 		getStationRequest.send();
+	}
+	
+	function processStations(stations, key){
+		//Recursive base case
+		if (key >= stations.length) return;
+		
+		//Update status bar
+		document.title = parseInt((key / stations.length) * 100) + "% Loaded";
+		
+		//For each station, try to geocode a country for custom markers
+		//for (key in stations){
+			var httpRequest = new XMLHttpRequest();
+
+			//This fires when geocoder returns.
+			httpRequest.onreadystatechange = function(){
+				if (httpRequest.readyState == 4 && httpRequest.status == 200){
+					this.mapOwner.addNewMarker(
+						this.stations[this.key].latitude,
+						this.stations[this.key].longitude,
+						httpRequest.responseText,
+						this.stations[this.key].name,
+						this.stations[this.key].latitude + ", " + 
+						this.stations[this.key].longitude);
+					if (this.key + 1 == this.stations.length) document.title = "Ground Station Map";
+					this.mapOwner.processStations(this.stations, this.key + 1)
+				}
+			}
+			httpRequest.key = key;
+			httpRequest.mapOwner = this;
+			httpRequest.stations = stations;
+			httpRequest.open("GET",
+				"geocodeLongLat.php?lat=" + stations[key].latitude +
+				"&long="+ stations[key].longitude, true);
+			httpRequest.send();
+		//}
 	}
 	function addNewMarker(lat, lng, country, name, info){
 		if (country != '' && country != "None"){
