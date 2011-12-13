@@ -12,11 +12,10 @@ function groundStationMapper(){
 	this.init = init;
 	this.loadGroundStations = loadGroundStations;
 	this.addNewMarker = addNewMarker;
-	//this.processLongLat = processLongLat;
 	
 	function init(){
 		this.loadGroundStations();
-		//Init Map
+		//Init Map, centering it on 0,0, zoomed to fit the whole world in screen
 		var latlng = new google.maps.LatLng(0, 0);
 		var options = { zoom: 2, center: latlng,
 			mapTypeId: google.maps.MapTypeId.ROADMAP 
@@ -24,8 +23,6 @@ function groundStationMapper(){
 		};
 		// Calling the constructor, thereby initializing the map
 		this.map = new google.maps.Map(document.getElementById('map_div'), options);
-		
-		//this.addNewMarker(42, -121, 'au');
 	}
 	
 	function loadGroundStations(){
@@ -92,5 +89,4 @@ function groundStationMapper(){
 			return '<div class="infowindow"><strong>'+ name +
 			'</strong><br/>'+ info +'</div>'; }
 	}
-	//function processLongLat(
 }

@@ -18,9 +18,6 @@ require_once 'SatelliteSituationCenterService.php';
 	$ssc = new SatelliteSituationCenterService($endpoint, $soapOptions);
     $result = $ssc->getAllGroundStations(new getAllGroundStations());
 
-	//Process each ground station
-    //foreach ($result->return as $station) {
-    //}
-	//$output .= "}";
-	echo json_encode($result->return);//$output;
+	//This is my only addition, just echo the station info in JSON form
+	echo json_encode($result->return);
 ?>
